@@ -43,13 +43,13 @@ provider "flux" {
   }
 }
 
-# module "flux_bootstrap" {
-#   source            = "./modules/flux_bootstrap/"
-#   github_repository = "${var.GITHUB_OWNER}/${var.FLUX_GITHUB_REPO}"
-#   private_key       = module.tls_private_key.private_key_pem
-#   config_host       = module.kind_cluster.endpoint
-#   config_client_key = module.kind_cluster.client_key
-#   config_ca         = module.kind_cluster.ca
-#   config_crt        = module.kind_cluster.crt
-#   github_token      = var.GITHUB_TOKEN
-# }
+module "flux_bootstrap" {
+  source            = "./modules/flux_bootstrap/"
+  github_repository = "${var.GITHUB_OWNER}/${var.FLUX_GITHUB_REPO}"
+  private_key       = module.tls_keys.private_key_pem
+  config_host       = module.kind_cluster.endpoint
+  config_client_key = module.kind_cluster.client_key
+  config_ca         = module.kind_cluster.ca
+  config_crt        = module.kind_cluster.crt
+  github_token      = var.GITHUB_TOKEN
+}
