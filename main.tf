@@ -29,12 +29,27 @@ module "github_repository" {
   GITHUB_TOKEN             = var.GITHUB_TOKEN
 }
 
-module "fluxcd_bootstrap" {
-  source            = "./modules/fluxcd-bootstrap"
-  github_repository = "${var.GITHUB_OWNER}/${module.github_repository.name}"
-  target_path       = "clusters/dev"
-  private_key       = module.tls_keys.private_key_pem
-  GITHUB_TOKEN      = var.GITHUB_TOKEN
-  config_path       = module.kind_cluster.kubeconfig
-  #depends_on        = [module.kind_cluster]
+provider "flux" {
+  alias = "bootstrap"
+  kubernetes = {
+    config_path = module.kind_cluster.kubeconfig
+  }
+  git = {
+    url = "https://github.com/${var.GITHUB_OWNER}/${var.repository_name}.git"
+    http = {
+      username = "git"
+      password = var.GITHUB_TOKEN
+    }
+  }
 }
+
+# module "flux_bootstrap" {
+#   source            = "./modules/flux_bootstrap/"
+#   github_repository = "${var.GITHUB_OWNER}/${var.FLUX_GITHUB_REPO}"
+#   private_key       = module.tls_private_key.private_key_pem
+#   config_host       = module.kind_cluster.endpoint
+#   config_client_key = module.kind_cluster.client_key
+#   config_ca         = module.kind_cluster.ca
+#   config_crt        = module.kind_cluster.crt
+#   github_token      = var.GITHUB_TOKEN
+# }

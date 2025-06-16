@@ -1,5 +1,5 @@
 variable "GITHUB_OWNER" {
-  description = "GitHub owner (user / org)"
+  description = "GitHub owner"
   type        = string
 }
 
@@ -17,7 +17,7 @@ variable "repository_name" {
 variable "repository_visibility" {
   description = "Visibility of the GitOps repository"
   type        = string
-  default     = "public"
+  default     = "private"
 }
 
 variable "cluster_name" {

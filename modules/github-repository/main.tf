@@ -4,6 +4,7 @@ provider "github" {
 }
 
 resource "github_repository" "this" {
+#  count      = var.create_repository ? 1 : 0
   name       = var.repository_name
   visibility = var.repository_visibility
   auto_init  = true

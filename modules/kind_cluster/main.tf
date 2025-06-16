@@ -1,4 +1,4 @@
 resource "kind_cluster" "this" {
-  name       = "kind-cluster-tf"
+  name       = "kind-flux"
   wait_for_ready = true
 }
