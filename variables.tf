@@ -20,10 +20,9 @@ variable "repository_visibility" {
   default     = "private"
 }
 
-variable "cluster_name" {
-  description = "Kind cluster name"
+variable "config_raw" {
+  description = "kubeconfig"
   type        = string
-  default     = "kind-cluster-tf"
 }
 
 variable "target_path" {
@@ -31,3 +30,8 @@ variable "target_path" {
   type        = string
   default     = "clusters/dev"
 }
+
+# variable "FLUX_GITHUB_REPO" {
+#   description = "flux repo"
+#   type        = string
+# }

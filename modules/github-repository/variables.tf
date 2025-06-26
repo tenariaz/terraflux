@@ -8,7 +8,7 @@ variable "GITHUB_TOKEN" {
   description = "GitHub personal access token"
 }
 
-variable "repository_name" {
+variable "FLUX_GITHUB_REPO" {
   type        = string
   description = "GitHub repository"
 }
