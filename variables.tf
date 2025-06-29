@@ -20,15 +20,16 @@ variable "repository_visibility" {
   default     = "private"
 }
 
-variable "config_raw" {
-  description = "kubeconfig"
-  type        = string
-}
+# variable "config_raw" {
+#   description = "kubeconfig"
+#   type        = string
+
+# }
 
 variable "target_path" {
   description = "Path in the Git repo where Flux manifests live"
   type        = string
-  default     = "clusters/dev"
+  default     = "clusters/demo"
 }
 
 # variable "FLUX_GITHUB_REPO" {
