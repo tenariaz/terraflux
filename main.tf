@@ -29,13 +29,7 @@ module "github_repository" {
   GITHUB_OWNER             = var.GITHUB_OWNER
   GITHUB_TOKEN             = var.GITHUB_TOKEN
 }
-# provider "kubernetes" {
-#   config_path = module.kind_cluster.kubeconfig
-# }
-# resource "local_file" "kubeconfig" {
-#   content  = module.kind_cluster.kubeconfig
-#   filename = "./kubeconfig.yaml"
-# }
+
 provider "flux" {
   kubernetes = {
     config_path = "./kind-fluxcd-config"
@@ -60,5 +54,73 @@ module "fluxcd_bootstrap" {
   github_token      = var.GITHUB_TOKEN
   providers = {
     flux = flux
+  }
+}
+
+module "gke_cluster" {
+  source         = "./modules/gke_cluster"
+  GOOGLE_REGION  = var.GOOGLE_REGION
+  GOOGLE_PROJECT = var.GOOGLE_PROJECT
+  GKE_NUM_NODES  = 2
+}
+module "gke-workload-identity" {
+  source        = "terraform-google-modules/kubernetes-engine/google//modules/workload-identity"
+  use_existing_k8s_sa = true
+  name                = "kustomize-controller"
+  namespace           = "flux-system"
+  project_id          = var.GOOGLE_PROJECT
+  cluster_name        = "main"
+  location            = var.GOOGLE_REGION
+  annotate_k8s_sa     = true
+  roles               = ["roles/cloudkms.cryptoKeyEncrypterDecrypter"]
+    module_depends_on = [
+    module.fluxcd_bootstrap
+  ]
+}
+
+module "kms" {
+  source          = "github.com/tenariaz/terraform-google-kms"
+  project_id      = var.GOOGLE_PROJECT
+  keyring         = "sops-flux"
+  location        = "global"
+  keys            = ["sops-key-flux"]
+  prevent_destroy = false
+}
+
+
+resource "null_resource" "cluster_credentials" {
+  depends_on = [
+    module.gke_cluster,
+    module.fluxcd_bootstrap
+  ]
+
+  provisioner "local-exec" {
+    command = <<EOF
+      ${module.gke_cluster.cluster.gke_get_credentials_command}
+    EOF
+  }
+}
+
+resource "null_resource" "git_commit" {
+  depends_on = [
+    module.fluxcd_bootstrap,
+    module.kms
+  ]
+
+  provisioner "local-exec" {
+    command = <<EOF
+      if [ -d ${var.repository_name} ]; then
+        rm -rf ${var.repository_name}
+      fi
+      git clone ${module.github_repository.values.http_clone_url}
+      ./sops -e -gcp-kms ${module.kms.keys.sops-key-flux} --encrypted-regex '^(token)$' secret.yaml > ./demo_app/demo/secret-enc.yaml
+      cp -r demo_app/* ${var.repository_name}/${var.FLUX_GITHUB_TARGET_PATH}/
+      cd ${var.repository_name}
+      git add .
+      git commit -m"Added all manifests"
+      git push
+      cd ..
+      rm -rf ${var.repository_name}
+    EOF
   }
 }

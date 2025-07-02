@@ -20,19 +20,24 @@ variable "repository_visibility" {
   default     = "private"
 }
 
-# variable "config_raw" {
-#   description = "kubeconfig"
-#   type        = string
-
-# }
-
 variable "target_path" {
   description = "Path in the Git repo where Flux manifests live"
   type        = string
   default     = "clusters/demo"
 }
 
-# variable "FLUX_GITHUB_REPO" {
-#   description = "flux repo"
-#   type        = string
-# }
+variable "FLUX_GITHUB_TARGET_PATH" {
+  type        = string
+  default     = "clusters"
+  description = "Flux manifests subdirectory"
+}
+
+variable "GOOGLE_PROJECT" {
+  type        = string
+  description = "GCP project to use"
+}
+variable "GOOGLE_REGION" {
+  type = string
+  default = "us-central1-a"
+  description = "GCP region to use"
+}
